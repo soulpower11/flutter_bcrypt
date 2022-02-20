@@ -8,6 +8,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.PluginRegistry.Registrar
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 import at.favre.lib.crypto.bcrypt.BCrypt.SALT_LENGTH
@@ -18,15 +19,15 @@ import java.security.SecureRandom
 import java.util.*
 
 class FlutterBcryptPlugin: FlutterPlugin, MethodCallHandler {
+  private lateinit var channel : MethodChannel
+
   companion object {
     @JvmStatic
-    fun registerWith(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-      var channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_bcrypt")
+    fun registerWith(registrar: Registrar) {
+      var channel = MethodChannel(registrar.messenger(), "flutter_bcrypt")
       channel.setMethodCallHandler(FlutterBcryptPlugin())
     }
   }
-
-  private lateinit var channel : MethodChannel
 
   fun MethodCall.password(): String? {
     return this.argument("password")
