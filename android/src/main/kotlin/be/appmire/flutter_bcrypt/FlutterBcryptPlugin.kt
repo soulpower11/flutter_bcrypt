@@ -1,29 +1,32 @@
 package be.appmire.flutter_bcrypt
 
 import android.util.Log
+import androidx.annotation.NonNull
 import at.favre.lib.bytes.Bytes
 
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 import at.favre.lib.crypto.bcrypt.BCrypt.SALT_LENGTH
 import at.favre.lib.crypto.bcrypt.Radix64Encoder
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import java.nio.ByteBuffer
 import java.security.SecureRandom
 import java.util.*
 
-class FlutterBcryptPlugin: MethodCallHandler {
+class FlutterBcryptPlugin: FlutterPlugin, MethodCallHandler {
   companion object {
     @JvmStatic
-    fun registerWith(registrar: Registrar) {
-      val channel = MethodChannel(registrar.messenger(), "flutter_bcrypt")
+    fun registerWith(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+      var channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_bcrypt")
       channel.setMethodCallHandler(FlutterBcryptPlugin())
     }
   }
+
+  private lateinit var channel : MethodChannel
 
   fun MethodCall.password(): String? {
     return this.argument("password")
@@ -140,5 +143,15 @@ class FlutterBcryptPlugin: MethodCallHandler {
     }
 
 
+  }
+
+  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_bcrypt")
+    channel.setMethodCallHandler(FlutterBcryptPlugin())
+  }
+
+
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    channel.setMethodCallHandler(FlutterBcryptPlugin())
   }
 }
